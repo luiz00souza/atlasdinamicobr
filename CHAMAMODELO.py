@@ -1,7 +1,7 @@
 import sys
-modulo_diretorio = r'C:\Users\campo\Desktop\mestrado\Raster Reclassificados_clean_08_25\88_rotinas_python'
-proc_dir=r'C:\Users\campo\Desktop\mestrado\Raster Reclassificados_clean_08_25'
-sys.path.append(modulo_diretorio)
+#modulo_diretorio = r'C:\Users\campo\Desktop\mestrado\Raster Reclassificados_clean_08_25\88_rotinas_python'
+#proc_dir=r'C:\Users\campo\Desktop\mestrado\Raster Reclassificados_clean_08_25'
+#sys.path.append(modulo_diretorio)
 from GERADORDEMODELO import *
 from COMPILADORDEMODELO import *
 from VALIDADORDOMODELO import *
@@ -44,4 +44,5 @@ def chama_modelo():
         print(f"Erro durante o processamento: {e}")
     # df_resultados=resultados['df_resultados']
     # lat=df_resultados[['Latitude','Longitude','Valor_Amostrado','ID_CLASSIFICACAO_FINAL']]
+
 # chama_modelo()
