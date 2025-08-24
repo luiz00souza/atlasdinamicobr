@@ -8,7 +8,7 @@ from branca.element import Template, MacroElement
 from streamlit_folium import st_folium
 
 # modulo_diretorio = r'C:\Users\campo\Desktop\mestrado\DADOS121223\Raster Reclassificados\88_rotinas_python'
-import CHAMAMODELO
+#import CHAMAMODELO
 shapefiles_folder_subdivididos = r"C:\Users\campo\Desktop\mestrado\DADOS121223\Raster Reclassificados\arrays padronizados\Shapefiles_Classes"
 os.makedirs(shapefiles_folder_subdivididos, exist_ok=True)
 
@@ -360,7 +360,7 @@ with tab2:
                 for i in range(100):
                     time.sleep(0.05)  # Simula um delay visual
                     progress.progress(i + 1)
-                chama_modelo()
+                #chama_modelo()
             st.success("Execução concluída!")
 
 
@@ -410,6 +410,7 @@ def load_shapefiles(shapefiles_folder):
     return shapefiles
 
 # shapefiles_mesclados = load_shapefiles(shapefiles_folder_mesclados)
+
 
 
 
