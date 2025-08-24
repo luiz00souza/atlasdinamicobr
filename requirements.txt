@@ -8,3 +8,16 @@ numpy
 setuptools
 utide
 PyGithub
+streamlit
+streamlit-folium
+pandas
+numpy
+plotly
+geopandas
+shapely
+folium
+rasterio
+pyproj
+fiona
+rtree
+requests
