@@ -11,7 +11,9 @@ df_teste = pd.read_csv("ALLDATA_onehot_clipped.csv")
 
 # modulo_diretorio = r'C:\Users\campo\Desktop\mestrado\DADOS121223\Raster Reclassificados\88_rotinas_python'
 #import CHAMAMODELO
-shapefiles_folder_subdivididos = r"C:\Users\campo\Desktop\mestrado\DADOS121223\Raster Reclassificados\arrays padronizados\Shapefiles_Classes"
+#shapefiles_folder_subdivididos = r"C:\Users\campo\Desktop\mestrado\DADOS121223\Raster Reclassificados\arrays padronizados\Shapefiles_Classes"
+shapefiles_folder_subdivididos = "Shapefiles_Classes"
+
 os.makedirs(shapefiles_folder_subdivididos, exist_ok=True)
 
 #sys.path.append(modulo_diretorio)
@@ -412,6 +414,7 @@ def load_shapefiles(shapefiles_folder):
     return shapefiles
 
 # shapefiles_mesclados = load_shapefiles(shapefiles_folder_mesclados)
+
 
 
 
