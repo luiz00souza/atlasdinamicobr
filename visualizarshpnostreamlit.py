@@ -6,7 +6,8 @@ import geopandas as gpd
 import folium 
 from branca.element import Template, MacroElement
 from streamlit_folium import st_folium
-df = pd.read_csv("ALLDATA_onehot_clipped.csv")
+import pandas as pd
+df_teste = pd.read_csv("ALLDATA_onehot_clipped.csv")
 
 # modulo_diretorio = r'C:\Users\campo\Desktop\mestrado\DADOS121223\Raster Reclassificados\88_rotinas_python'
 #import CHAMAMODELO
@@ -411,6 +412,7 @@ def load_shapefiles(shapefiles_folder):
     return shapefiles
 
 # shapefiles_mesclados = load_shapefiles(shapefiles_folder_mesclados)
+
 
 
 
