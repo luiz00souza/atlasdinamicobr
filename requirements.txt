@@ -1,3 +1,4 @@
+gdal
 scikit-learn
 streamlit 
 pandas
