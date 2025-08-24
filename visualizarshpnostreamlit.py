@@ -8,8 +8,8 @@ from branca.element import Template, MacroElement
 from streamlit_folium import st_folium
 
 modulo_diretorio = r'C:\Users\campo\Desktop\mestrado\DADOS121223\Raster Reclassificados\88_rotinas_python'
-#from CHAMAMODELO import *
-import CHAMAMODELO
+from CHAMAMODELO import *
+#import CHAMAMODELO
 shapefiles_folder_subdivididos = r"C:\Users\campo\Desktop\mestrado\DADOS121223\Raster Reclassificados\arrays padronizados\Shapefiles_Classes"
 os.makedirs(shapefiles_folder_subdivididos, exist_ok=True)
 
@@ -411,4 +411,5 @@ def load_shapefiles(shapefiles_folder):
     return shapefiles
 
 # shapefiles_mesclados = load_shapefiles(shapefiles_folder_mesclados)
+
 
