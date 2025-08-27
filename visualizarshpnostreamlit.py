@@ -141,7 +141,23 @@ def load_shapefiles(shapefiles_folder):
 # shapefiles_mesclados = load_shapefiles(shapefiles_folder_mesclados)
 shapefiles_subdivididos = load_shapefiles(shapefiles_folder_subdivididos)
 # Função para criar o mapa com folium
+import zipfile
+import io
 
+def create_shapefile_zip(shapefiles_folder, selected_layers):
+    """
+    Cria um arquivo ZIP com os shapefiles selecionados (incluindo .shp, .shx, .dbf, .prj, etc.)
+    """
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as zf:
+        for shp in selected_layers:
+            base = os.path.splitext(shp)[0]
+            for ext in [".shp", ".shx", ".dbf", ".prj", ".cpg"]:
+                file_path = os.path.join(shapefiles_folder, base + ext)
+                if os.path.exists(file_path):
+                    zf.write(file_path, arcname=os.path.basename(file_path))
+    buffer.seek(0)
+    return buffer
 def create_map(shapefiles_folder, selected_layers):
     m = folium.Map(location=[-15, -47], zoom_start=4, control_scale=True)
 
@@ -271,12 +287,12 @@ def create_map(shapefiles_folder, selected_layers):
 
 
 
-st.title("Visualização de Shapefiles com Folium")
+st.title("Atlas Interativo do Fundo do Mar")
 
-tab1, tab2, tab3 = st.tabs(["Dados marinhos","Escolha de Camada", "Mapa e Seleção de Camadas"])
+tab1, tab2, tab3 = st.tabs(["📍 Cadastro de Pontos","Processar Dados", "🗺️ Visualizar Mapa"])
 
 with tab1:
-    st.header("📌 Aba 1 - Cadastro de Dados Marinhos")
+    st.header("📍 Cadastro de Pontos")
 
     # Inicializa a sessão de dados (se ainda não inicializada)
     if "dados" not in st.session_state:
@@ -375,9 +391,9 @@ with tab3:
     # Se não houver escolha ainda, definir padrão
     st.write("Escolha o tipo de camada desejada:")
     # Dois botões para escolher camada mesclada ou subdivididadi
-    if st.button("Camadas Individuais"):
+    if st.button("🔎 Ver categorias gerais (Zonas, Substratos, Biologia)"):
         st.session_state['layer_type'] = 'Mesclados'
-    if st.button("Camadas Subdivididas"):
+    if st.button("🧩 Ver subcategorias detalhadas"):
         st.session_state['layer_type'] = 'Subdivididos'
     if 'layer_type' not in st.session_state:
         st.session_state['layer_type'] = 'Mesclados'
@@ -406,7 +422,14 @@ with tab3:
     if selected_layers:
         map_obj = create_map(shapefiles_folder, selected_layers)
         st_data = st_folium(map_obj, width=900, height=600)
-
+        # Botão para baixar shapefiles selecionados
+        zip_buffer = create_shapefile_zip(shapefiles_folder, selected_layers)
+        st.download_button(
+            label="⬇️ Baixar Shapefiles Selecionados (.zip)",
+            data=zip_buffer,
+            file_name="shapefiles_selecionados.zip",
+            mime="application/zip"
+        )
     else:
         st.info("Selecione ao menos uma camada para visualizar o mapa.")
 def load_shapefiles(shapefiles_folder):
@@ -414,6 +437,7 @@ def load_shapefiles(shapefiles_folder):
     return shapefiles
 
 # shapefiles_mesclados = load_shapefiles(shapefiles_folder_mesclados)
+
 
 
 
