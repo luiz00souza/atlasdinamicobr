@@ -2,11 +2,8 @@ streamlit
 pandas
 geopandas
 folium
-streamlit-folium
 shapely
-fiona
-pyproj
-rasterio
 matplotlib
 plotly
-gdal
+fiona
+pyproj
