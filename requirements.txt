@@ -10,3 +10,11 @@ plotly
 fiona
 pyproj
 gdal
+streamlit
+pandas
+geopandas
+folium
+streamlit-folium
+shapely
+fiona
+pyproj
