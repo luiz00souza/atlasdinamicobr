@@ -189,13 +189,28 @@ def create_shapefile_zip(shapefiles_folder, selected_layers):
     return buffer
 
 def create_map(shapefiles_folder, selected_layers):
-    #from folium import plugins
-    
-    # Dentro da função create_map()
-    m = folium.Map(location=[-15, -47], zoom_start=4, control_scale=True)
-    
-    # Plugin de coordenadas ao clicar no mapa
-    #plugins.LatLngPopup().add_to(m)
+    import numpy as np
+    from folium import Map, GeoJson, LayerControl, Element
+    from folium import plugins
+    from branca.element import Template, MacroElement
+    import geopandas as gpd
+    import os
+
+    # Cria mapa base
+    m = Map(location=[-15, -47], zoom_start=4, control_scale=False)  # escala será custom
+    plugins.Scale(position='bottomright').add_to(m)  # Escala dinâmica
+
+    # Datum fixo
+    datum_html = """
+    <div style="
+        position: absolute; bottom: 30px; right: 10px; z-index: 9999;
+        background-color: rgba(255,255,255,0.9); padding: 4px 6px;
+        border-radius: 4px; font-size: 11px; box-shadow: 0 0 4px rgba(0,0,0,0.2);
+    ">Datum: WGS84</div>
+    """
+    m.get_root().html.add_child(Element(datum_html))
+
+    # Definir cores
     layer_colors = [
         '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f',
         '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#b15928', '#ffffb3',
@@ -206,7 +221,7 @@ def create_map(shapefiles_folder, selected_layers):
         '#fbb4ae', '#b4464b', '#7fc97f'
     ]
 
-    # Garante cores suficientes
+    # Garantir cores suficientes
     shp_files = [f for f in os.listdir(shapefiles_folder) if f.lower().endswith('.shp')]
     num_layers = max(len(shp_files), len(selected_layers))
     if num_layers > len(layer_colors):
@@ -214,13 +229,14 @@ def create_map(shapefiles_folder, selected_layers):
         layer_colors = (layer_colors * times)[:num_layers]
 
     bounds = []
-    legend_entries = []  # (nome, cor)
+    legend_entries = []
 
+    # Adiciona camadas
     for idx, shp in enumerate(selected_layers):
         gdf = gpd.read_file(os.path.join(shapefiles_folder, shp))
         color = layer_colors[idx % len(layer_colors)]
         layer_name = shp.replace('.shp', '')
-        folium.GeoJson(
+        GeoJson(
             gdf,
             name=fmt_layer_name(layer_name),
             style_function=lambda feature, color=color: {
@@ -233,7 +249,7 @@ def create_map(shapefiles_folder, selected_layers):
         bounds.append(gdf.total_bounds)
         legend_entries.append((fmt_layer_name(layer_name), color))
 
-    # Ajusta os limites
+    # Ajusta limites do mapa
     if bounds:
         min_lon = min([b[0] for b in bounds])
         min_lat = min([b[1] for b in bounds])
@@ -241,7 +257,8 @@ def create_map(shapefiles_folder, selected_layers):
         max_lat = max([b[3] for b in bounds])
         m.fit_bounds([[min_lat, min_lon], [max_lat, max_lon]])
 
-    folium.LayerControl(collapsed=False).add_to(m)
+    # Controle de camadas
+    LayerControl(collapsed=False).add_to(m)
 
     # Legenda fixa
     legend_html = """
@@ -250,7 +267,7 @@ def create_map(shapefiles_folder, selected_layers):
         position: relative; width: 100%; height: 100%;
     ">
       <div style="
-        position: absolute; bottom: 10px; left: 10px; z-index: 9999;
+        position: absolute; bottom: 60px; left: 10px; z-index: 9999;
         background-color: rgba(255,255,255,0.9); padding: 8px 10px;
         border-radius: 6px; font-size: 12px; max-width: 260px;
         box-shadow: 0 0 6px rgba(0,0,0,0.25); line-height: 1.25;
