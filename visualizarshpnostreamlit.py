@@ -206,7 +206,7 @@ def create_map(shapefiles_folder, selected_layers, grid_interval=2):
     for idx, shp in enumerate(selected_layers):
         filepath = os.path.join(shapefiles_folder, shp)
         if not os.path.exists(filepath):
-            st.warning(f"⚠️ Arquivo não encontrado: {shp}")
+            #st.warning(f"⚠️ Arquivo não encontrado: {shp}")
             continue  # pula este shapefile
 
         try:
@@ -423,21 +423,58 @@ elif view == "🧾 Consultar Dados":
 # =========================
 elif view == "ℹ️ Sobre o Atlas":
     st.subheader("ℹ️ Sobre o Atlas Interativo do Fundo do Mar")
+
     st.markdown(
         """
-        Este atlas é baseado na classificação **EUNIS adaptada para o Brasil**.
-        
-        **Objetivo:**  
-        Fornecer um atlas interativo de habitats marinhos, integrando dados de substrato, biogênico e zona hidronímica.
+        O **Atlas Interativo do Fundo do Mar** apresenta a distribuição de habitats marinhos no Brasil,  
+        utilizando a classificação **EUNIS adaptada para condições locais**.  
 
-        **Categorias de dados:**
-        - **Zona Hidronímica:** Littoral, Circalittoral, Offshore, Bathyal Superior
-        - **Substrato:** Sand, Mixed, Mud, Coarse, Hard Rock
-        - **Biogênico:** Recifal, Rodolitos, Biogenic not specified, Terrigenous
+        ## Classificação dos Habitats
+        A metodologia envolveu **padronização de dados, classificação hierárquica** e **geração do atlas**.  
+        O processo está estruturado em três níveis de classificação:
 
-        **Uso do Atlas:**  
-        - Visualizar habitats marinhos no Brasil  
-        - Consultar áreas por categoria  
-        - Incorporar novos dados após avaliação
+        ### 1️⃣ Nível Hidrodinâmico
+        Faixas de profundidade baseadas na batimetria local:
+        - **Littoral:** < 30 m
+        - **Circalittoral:** 30 – 200 m
+        - **Offshore:** 200 – 1000 m
+        - **Upper Bathyal:** 1000 – 2000 m
+        - **Lower Bathyal:** 2000 – 4000 m
+        - **Abissal:** > 4000 m
+
+        ### 2️⃣ Nível de Substrato
+        Baseado em **granulometria, composição química e observações de campo**:
+        - **Hard Rock:** Substrato rochoso, sólido e exposto
+        - **Coarse:** Cascalho ou fragmentos
+        - **Sand:** Areia sem lama significativa
+        - **Mixed:** Mistura de areia e lama/silte/argila
+        - **Mud:** Predominância de lama/silte/argila sem areia
+
+        ### 3️⃣ Nível Biogênico
+        Baseado em **observações de campo e presença de organismos biogênicos**:
+        - **Recifal:** Recifes ou corais
+        - **Rhodolite:** Rodolitos
+        - **Biogenic not specified:** Conchas, algas ou outros organismos não especificados
+        - **Terrigenous:** Sem organismos biogênicos ou predominância de material terrígeno
+
+        ## Chaves de Reclassificação
+        Para garantir que cada ponto seja corretamente classificado:
+
+        **Substratos:**  
+        1. Hard Rock? → Hard Rock  
+        2. Cascalho/Fragmentos? → Coarse  
+        3. Areia sem Lama? → Sand  
+        4. Areia + Lama? → Mixed  
+        5. Lama sem Areia? → Mud  
+        6. Nenhum critério → Não identificado
+
+        **Biogênico:**  
+        1. Recifes/Corais? → Recifal  
+        2. Rodolitos? → Rhodolite  
+        3. Conchas/Algas? → Biogenic not specified  
+        4. Nenhum → Terrigenous
+
+        **Nota:** Este atlas **não é atualizado em tempo real**. Novos dados enviados serão avaliados antes de integrar ao modelo.
         """
     )
+
