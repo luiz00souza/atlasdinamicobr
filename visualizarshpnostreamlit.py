@@ -191,7 +191,13 @@ def create_shapefile_zip(shapefiles_folder, selected_layers):
 
 def create_map(shapefiles_folder, selected_layers):
     m = folium.Map(location=[-15, -47], zoom_start=4, control_scale=True)
-
+    from folium import plugins
+    
+    # Dentro da função create_map()
+    m = folium.Map(location=[-15, -47], zoom_start=4, control_scale=True)
+    
+    # Plugin de coordenadas ao clicar no mapa
+    plugins.LatLngPopup().add_to(m)
     layer_colors = [
         '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f',
         '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#b15928', '#ffffb3',
@@ -287,7 +293,7 @@ Usuários podem **enviar dados** para que sejam **avaliados** por nossa equipe t
 st.sidebar.header("Navegação")
 view = st.sidebar.radio(
     "Ir para:",
-    ["🗺️ Visualizar Mapa", "📍 Cadastrar Pontos", "⚙️ Processar Dados", "ℹ️ Sobre o Atlas"],
+    ["🗺️ Mapa Interativo", "📍 Cadastrar Pontos", "🧾 Consultar Dados", "ℹ️ Sobre o Atlas"],
     index=0
 )
 
