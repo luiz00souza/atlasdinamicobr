@@ -466,8 +466,6 @@ elif view == "ℹ️ Sobre o Atlas":
         3. Areia sem Lama? → Sand  
         4. Areia + Lama? → Mixed  
         5. Lama sem Areia? → Mud  
-        6. Nenhum critério → Não identificado
-
         **Biogênico:**  
         1. Recifes/Corais? → Recifal  
         2. Rodolitos? → Rhodolite  
