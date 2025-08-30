@@ -170,25 +170,25 @@ def create_shapefile_zip(shapefiles_folder, selected_layers):
 def create_map(shapefiles_folder, selected_layers, grid_interval=2):
     import geopandas as gpd
     import folium
-    from folium import LayerControl, GeoJson
-    from branca.element import Template, MacroElement
+    from folium import LayerControl, GeoJson, Element
     import os
+    from branca.element import Template, MacroElement
     import numpy as np
 
     # Mapa base
     m = folium.Map(location=[-15, -47], zoom_start=4, control_scale=True)
 
-    # Datum no canto inferior direito
+    # Datum fixo no canto inferior direito
     datum_html = """
     <div style="
-        position: absolute; bottom: 45px; left: 10px; z-index: 9999;
+        position: absolute; bottom: 10px; right: 10px; z-index: 9999;
         background-color: rgba(255,255,255,0.9); padding: 4px 6px;
         border-radius: 4px; font-size: 11px; box-shadow: 0 0 4px rgba(0,0,0,0.2);
     ">Datum: WGS84</div>
     """
     m.get_root().html.add_child(folium.Element(datum_html))
 
-    # Cores das camadas
+    # Definir cores e adicionar camadas
     layer_colors = [
         '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f',
         '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#b15928', '#ffffb3',
@@ -199,10 +199,15 @@ def create_map(shapefiles_folder, selected_layers, grid_interval=2):
         '#fbb4ae', '#b4464b', '#7fc97f'
     ]
 
+    shp_files = [f for f in os.listdir(shapefiles_folder) if f.lower().endswith('.shp')]
+    num_layers = max(len(shp_files), len(selected_layers))
+    if num_layers > len(layer_colors):
+        times = (num_layers // len(layer_colors)) + 1
+        layer_colors = (layer_colors * times)[:num_layers]
+
     bounds = []
     legend_entries = []
 
-    # Adiciona shapefiles
     for idx, shp in enumerate(selected_layers):
         gdf = gpd.read_file(os.path.join(shapefiles_folder, shp))
         color = layer_colors[idx % len(layer_colors)]
@@ -222,16 +227,34 @@ def create_map(shapefiles_folder, selected_layers, grid_interval=2):
 
     # Ajusta limites
     if bounds:
-        min_lon = min([b[0] for b in bounds]) - 2
-        min_lat = min([b[1] for b in bounds]) - 2
-        max_lon = max([b[2] for b in bounds]) + 2
-        max_lat = max([b[3] for b in bounds])+2
+        min_lon = min([b[0] for b in bounds])
+        min_lat = min([b[1] for b in bounds])
+        max_lon = max([b[2] for b in bounds])
+        max_lat = max([b[3] for b in bounds])
         m.fit_bounds([[min_lat, min_lon], [max_lat, max_lon]])
     else:
-        # Padrão
-        min_lat, min_lon, max_lat, max_lon = -35, -70, 5, -30
+        # Limites padrão se nenhum shapefile
+        min_lon, min_lat, max_lon, max_lat = -50, -20, -40, 0
 
-    #LayerControl(collapsed=False).add_to(m)
+    # -------------------
+    # Adiciona grid com labels dinâmicos
+    # -------------------
+    lat_lines = np.arange(np.floor(min_lat), np.ceil(max_lat) + grid_interval, grid_interval)
+    lon_lines = np.arange(np.floor(min_lon), np.ceil(max_lon) + grid_interval, grid_interval)
+
+    for lat in lat_lines:
+        folium.PolyLine([(lat, min_lon), (lat, max_lon)], color='gray', weight=0.5, opacity=0.5).add_to(m)
+        folium.map.Marker(
+            [lat, min_lon],
+            icon=folium.DivIcon(html=f'<div style="font-size:10px">{lat:.1f}°</div>')
+        ).add_to(m)
+
+    for lon in lon_lines:
+        folium.PolyLine([(min_lat, lon), (max_lat, lon)], color='gray', weight=0.5, opacity=0.5).add_to(m)
+        folium.map.Marker(
+            [min_lat, lon],
+            icon=folium.DivIcon(html=f'<div style="font-size:10px">{lon:.1f}°</div>')
+        ).add_to(m)
 
     # Legenda no canto inferior direito
     legend_html = """
@@ -258,23 +281,9 @@ def create_map(shapefiles_folder, selected_layers, grid_interval=2):
     macro._template = Template(legend_html)
     m.get_root().add_child(macro)
 
-    # Adicionar grid com labels
-    lat_ticks = np.arange(int(min_lat), int(max_lat)+1, grid_interval)
-    lon_ticks = np.arange(int(min_lon), int(max_lon)+1, grid_interval)
-    for lat in lat_ticks:
-        folium.PolyLine([[lat, min_lon], [lat, max_lon]], color='gray', weight=0.5, opacity=0.5).add_to(m)
-        folium.map.Marker(
-            [lat, min_lon], 
-            icon=folium.DivIcon(html=f"<div style='font-size:10px;color:black'>{lat}°</div>")
-        ).add_to(m)
-    for lon in lon_ticks:
-        folium.PolyLine([[min_lat, lon], [max_lat, lon]], color='gray', weight=0.5, opacity=0.5).add_to(m)
-        folium.map.Marker(
-            [min_lat, lon], 
-            icon=folium.DivIcon(html=f"<div style='font-size:10px;color:black'>{lon}°</div>")
-        ).add_to(m)
-
+    LayerControl(collapsed=False).add_to(m)
     return m
+
 
 # =========================
 # CSS Multiselect fonte 11
