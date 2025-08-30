@@ -223,7 +223,7 @@ def create_map(shapefiles_folder, selected_layers):
     legend_html = """
     {% macro html(this, kwargs) %}
     <div style="
-        position: relative; width: 100%; height: 100%;
+        position: absolute; width: 100%; height: 100%;
     ">
       <div style="
         position: absolute; top: 10px; left: 10px; z-index: 9999;
