@@ -1,4 +1,3 @@
-conseguiria por elementos importantes no mapa como grade, datum escala # -*- coding: utf-8 -*-
 import sys
 import streamlit as st
 import time
