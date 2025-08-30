@@ -192,27 +192,23 @@ def create_map(shapefiles_folder, selected_layers):
     import geopandas as gpd
     import folium
     from folium import LayerControl, GeoJson, Element
-    from branca.element import Template, MacroElement
     import os
+    from branca.element import Template, MacroElement
 
-    # Cria mapa base
-    m = folium.Map(location=[-15, -47], zoom_start=4, control_scale=False)  # desliga escala nativa
+    # Mapa base com escala nativa (canto inferior esquerdo)
+    m = folium.Map(location=[-15, -47], zoom_start=4, control_scale=True)
 
-    # Datum + escala custom no canto inferior direito
-    scale_datum_html = """
+    # Datum fixo no canto inferior direito
+    datum_html = """
     <div style="
         position: absolute; bottom: 10px; right: 10px; z-index: 9999;
-        background-color: rgba(255,255,255,0.9); padding: 6px 8px;
-        border-radius: 5px; font-size: 12px; box-shadow: 0 0 4px rgba(0,0,0,0.2);
-        line-height: 1.3;
-    ">
-        <b>Escala:</b> 100 km aprox.<br>
-        <b>Datum:</b> WGS84
-    </div>
+        background-color: rgba(255,255,255,0.9); padding: 4px 6px;
+        border-radius: 4px; font-size: 11px; box-shadow: 0 0 4px rgba(0,0,0,0.2);
+    ">Datum: WGS84</div>
     """
-    m.get_root().html.add_child(Element(scale_datum_html))
+    m.get_root().html.add_child(folium.Element(datum_html))
 
-    # Definir cores
+    # Definir cores e adicionar camadas
     layer_colors = [
         '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f',
         '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#b15928', '#ffffb3',
@@ -223,7 +219,6 @@ def create_map(shapefiles_folder, selected_layers):
         '#fbb4ae', '#b4464b', '#7fc97f'
     ]
 
-    # Garantir cores suficientes
     shp_files = [f for f in os.listdir(shapefiles_folder) if f.lower().endswith('.shp')]
     num_layers = max(len(shp_files), len(selected_layers))
     if num_layers > len(layer_colors):
@@ -233,7 +228,6 @@ def create_map(shapefiles_folder, selected_layers):
     bounds = []
     legend_entries = []
 
-    # Adiciona camadas
     for idx, shp in enumerate(selected_layers):
         gdf = gpd.read_file(os.path.join(shapefiles_folder, shp))
         color = layer_colors[idx % len(layer_colors)]
@@ -251,7 +245,7 @@ def create_map(shapefiles_folder, selected_layers):
         bounds.append(gdf.total_bounds)
         legend_entries.append((fmt_layer_name(layer_name), color))
 
-    # Ajusta limites do mapa
+    # Ajusta limites
     if bounds:
         min_lon = min([b[0] for b in bounds])
         min_lat = min([b[1] for b in bounds])
@@ -259,17 +253,16 @@ def create_map(shapefiles_folder, selected_layers):
         max_lat = max([b[3] for b in bounds])
         m.fit_bounds([[min_lat, min_lon], [max_lat, max_lon]])
 
-    # Controle de camadas
     LayerControl(collapsed=False).add_to(m)
 
-    # Legenda fixa (canto inferior esquerdo)
+    # Legenda no canto inferior esquerdo
     legend_html = """
     {% macro html(this, kwargs) %}
     <div style="
         position: relative; width: 100%; height: 100%;
     ">
       <div style="
-        position: absolute; bottom: 60px; left: 10px; z-index: 9999;
+        position: absolute; bottom: 10px; left: 10px; z-index: 9999;
         background-color: rgba(255,255,255,0.9); padding: 8px 10px;
         border-radius: 6px; font-size: 12px; max-width: 260px;
         box-shadow: 0 0 6px rgba(0,0,0,0.25); line-height: 1.25;
@@ -292,6 +285,7 @@ def create_map(shapefiles_folder, selected_layers):
     m.get_root().add_child(macro)
 
     return m
+
 
 
 # =========================
