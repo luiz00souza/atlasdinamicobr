@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+conseguiria por elementos importantes no mapa como grade, datum escala # -*- coding: utf-8 -*-
 import sys
 import streamlit as st
 import time
@@ -190,10 +190,13 @@ def create_shapefile_zip(shapefiles_folder, selected_layers):
     return buffer
 
 def create_map(shapefiles_folder, selected_layers):
-    m = folium.Map(location=[-15, -47], zoom_start=4, control_scale=True)
     from folium import plugins
+    
+    # Dentro da função create_map()
+    m = folium.Map(location=[-15, -47], zoom_start=4, control_scale=True)
+    
     # Plugin de coordenadas ao clicar no mapa
-    #plugins.LatLngPopup().add_to(m)
+    plugins.LatLngPopup().add_to(m)
     layer_colors = [
         '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f',
         '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#b15928', '#ffffb3',
@@ -296,7 +299,7 @@ view = st.sidebar.radio(
 # =========================
 # 1) VISUALIZAR MAPA
 # =========================
-if view == "🗺️ Visualizar Mapa":
+if view == "🗺️ Mapa Interativo":
     st.subheader("🗺️ Mapa de Habitats (EUNIS)")
 
     # Controles na sidebar
@@ -454,7 +457,7 @@ elif view == "📍 Cadastrar Pontos":
 # =========================
 # 3) PROCESSAR DADOS
 # =========================
-elif view == "⚙️ Processar Dados":
+elif view == "🧾 Consultar Dados":
     st.subheader("⚙️ Processamento / Modelo")
     st.markdown(
         "Aqui você pode visualizar dados tabulares utilizados no processamento e acionar o modelo. "
