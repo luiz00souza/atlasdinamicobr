@@ -255,7 +255,7 @@ def create_map(shapefiles_folder, selected_layers):
         max_lat = max([b[3] for b in bounds])
         m.fit_bounds([[min_lat, min_lon], [max_lat, max_lon]])
 
-    LayerControl(collapsed=False).add_to(m)
+    #LayerControl(collapsed=False).add_to(m)
 
     # =========================
     # Legenda no canto superior esquerdo
