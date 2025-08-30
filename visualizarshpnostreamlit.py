@@ -222,12 +222,15 @@ def create_map(shapefiles_folder, selected_layers):
     # Legenda
     legend_html = """
     {% macro html(this, kwargs) %}
-    <div style="position: relative; width: 100%; height: 100%;">
+    <div style="
+        position: relative; width: 100%; height: 100%;
+    ">
       <div style="
         position: absolute; top: 10px; left: 10px; z-index: 9999;
         background-color: rgba(255,255,255,0.9); padding: 8px 10px;
         border-radius: 6px; font-size: 12px; max-width: 260px;
-        box-shadow: 0 0 6px rgba(0,0,0,0.25); line-height: 1.25;">
+        box-shadow: 0 0 6px rgba(0,0,0,0.25); line-height: 1.25;
+      ">
         <b>Legenda</b><br>
     """
     for name, color in legend_entries:
