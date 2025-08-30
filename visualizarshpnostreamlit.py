@@ -167,12 +167,13 @@ def create_shapefile_zip(shapefiles_folder, selected_layers):
     buffer.seek(0)
     return buffer
 
-def create_map(shapefiles_folder, selected_layers):
+def create_map(shapefiles_folder, selected_layers, grid_interval=5):
     import geopandas as gpd
     import folium
     from folium import LayerControl, GeoJson
     from branca.element import Template, MacroElement
     import os
+    import numpy as np
 
     # Mapa base
     m = folium.Map(location=[-15, -47], zoom_start=4, control_scale=True)
@@ -186,17 +187,6 @@ def create_map(shapefiles_folder, selected_layers):
     ">Datum: WGS84</div>
     """
     m.get_root().html.add_child(folium.Element(datum_html))
-
-    # Adicionar grid com rótulos
-    folium.raster_layers.TileLayer(
-        tiles='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-        attr='OSM',
-        name='OSM',
-    ).add_to(m)
-    folium.GridLayer().add_to(m)  # Grid simples (sem labels nativos)
-    # Labels da grid podem ser feitos via MarkerCluster ou via MiniMap externo,
-    # Folium não suporta labels de grid nativo facilmente. Alternativa:
-    # adicionar marcadores em linhas de latitude/longitude importantes
 
     # Cores das camadas
     layer_colors = [
@@ -212,6 +202,7 @@ def create_map(shapefiles_folder, selected_layers):
     bounds = []
     legend_entries = []
 
+    # Adiciona shapefiles
     for idx, shp in enumerate(selected_layers):
         gdf = gpd.read_file(os.path.join(shapefiles_folder, shp))
         color = layer_colors[idx % len(layer_colors)]
@@ -236,6 +227,9 @@ def create_map(shapefiles_folder, selected_layers):
         max_lon = max([b[2] for b in bounds])
         max_lat = max([b[3] for b in bounds])
         m.fit_bounds([[min_lat, min_lon], [max_lat, max_lon]])
+    else:
+        # Padrão
+        min_lat, min_lon, max_lat, max_lon = -35, -70, 5, -30
 
     LayerControl(collapsed=False).add_to(m)
 
@@ -264,10 +258,23 @@ def create_map(shapefiles_folder, selected_layers):
     macro._template = Template(legend_html)
     m.get_root().add_child(macro)
 
+    # Adicionar grid com labels
+    lat_ticks = np.arange(int(min_lat), int(max_lat)+1, grid_interval)
+    lon_ticks = np.arange(int(min_lon), int(max_lon)+1, grid_interval)
+    for lat in lat_ticks:
+        folium.PolyLine([[lat, min_lon], [lat, max_lon]], color='gray', weight=0.5, opacity=0.5).add_to(m)
+        folium.map.Marker(
+            [lat, min_lon], 
+            icon=folium.DivIcon(html=f"<div style='font-size:10px;color:black'>{lat}°</div>")
+        ).add_to(m)
+    for lon in lon_ticks:
+        folium.PolyLine([[min_lat, lon], [max_lat, lon]], color='gray', weight=0.5, opacity=0.5).add_to(m)
+        folium.map.Marker(
+            [min_lat, lon], 
+            icon=folium.DivIcon(html=f"<div style='font-size:10px;color:black'>{lon}°</div>")
+        ).add_to(m)
+
     return m
-
-
-
 
 # =========================
 # CSS Multiselect fonte 11
