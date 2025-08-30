@@ -173,11 +173,12 @@ def create_map(shapefiles_folder, selected_layers):
     from folium import LayerControl, GeoJson
     from branca.element import Template, MacroElement
     import os
+    import numpy as np
 
     # Mapa base
     m = folium.Map(location=[-15, -47], zoom_start=4, control_scale=True)
 
-    # Datum fixo no canto inferior direito
+    # Datum no canto inferior direito
     datum_html = """
     <div style="
         position: absolute; bottom: 10px; right: 10px; z-index: 9999;
@@ -188,21 +189,28 @@ def create_map(shapefiles_folder, selected_layers):
     m.get_root().html.add_child(folium.Element(datum_html))
 
     # =========================
-    # Grid de coordenadas (lat/lon)
+    # Grid com labels
     # =========================
-    # Linhas a cada 2° no Brasil
-    import numpy as np
     lats = np.arange(-35, 5, 2)
     lons = np.arange(-75, -30, 2)
     for lat in lats:
         folium.PolyLine([[lat, lons[0]], [lat, lons[-1]]],
                         color="#999", weight=0.5, dash_array="5,5").add_to(m)
+        folium.map.Marker(
+            [lat, lons[0]-0.5],  # desloca para não sobrepor a linha
+            icon=folium.DivIcon(html=f'<div style="font-size:9px;color:#555">{lat}°</div>')
+        ).add_to(m)
+
     for lon in lons:
         folium.PolyLine([[lats[0], lon], [lats[-1], lon]],
                         color="#999", weight=0.5, dash_array="5,5").add_to(m)
+        folium.map.Marker(
+            [lats[-1]+0.5, lon],  # desloca para cima
+            icon=folium.DivIcon(html=f'<div style="font-size:9px;color:#555">{lon}°</div>')
+        ).add_to(m)
 
     # =========================
-    # Adiciona camadas shapefile
+    # Camadas shapefile
     # =========================
     layer_colors = [
         '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f',
@@ -240,7 +248,6 @@ def create_map(shapefiles_folder, selected_layers):
         bounds.append(gdf.total_bounds)
         legend_entries.append((fmt_layer_name(layer_name), color))
 
-    # Ajusta limites do mapa
     if bounds:
         min_lon = min([b[0] for b in bounds])
         min_lat = min([b[1] for b in bounds])
@@ -278,6 +285,7 @@ def create_map(shapefiles_folder, selected_layers):
     m.get_root().add_child(macro)
 
     return m
+
 
 # =========================
 # CSS Multiselect fonte 11
