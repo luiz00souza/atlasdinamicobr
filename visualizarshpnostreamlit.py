@@ -173,6 +173,7 @@ def create_map(shapefiles_folder, selected_layers):
     from folium import LayerControl, GeoJson
     from branca.element import Template, MacroElement
     import os
+    import numpy as np
 
     # Mapa base
     m = folium.Map(location=[-15, -47], zoom_start=4, control_scale=True)
@@ -187,18 +188,30 @@ def create_map(shapefiles_folder, selected_layers):
     """
     m.get_root().html.add_child(folium.Element(datum_html))
 
-    # Adicionar grid com rótulos
-    folium.raster_layers.TileLayer(
-        tiles='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-        attr='OSM',
-        name='OSM',
-    ).add_to(m)
-    folium.GridLayer().add_to(m)  # Grid simples (sem labels nativos)
-    # Labels da grid podem ser feitos via MarkerCluster ou via MiniMap externo,
-    # Folium não suporta labels de grid nativo facilmente. Alternativa:
-    # adicionar marcadores em linhas de latitude/longitude importantes
+    # =========================
+    # Grid com labels
+    # =========================
+    lats = np.arange(-35, 5, 2)
+    lons = np.arange(-75, -30, 2)
+    for lat in lats:
+        folium.PolyLine([[lat, lons[0]], [lat, lons[-1]]],
+                        color="#999", weight=0.5, dash_array="5,5").add_to(m)
+        folium.map.Marker(
+            [lat, lons[0]-0.5],  # desloca para não sobrepor a linha
+            icon=folium.DivIcon(html=f'<div style="font-size:9px;color:#555">{lat}°</div>')
+        ).add_to(m)
 
-    # Cores das camadas
+    for lon in lons:
+        folium.PolyLine([[lats[0], lon], [lats[-1], lon]],
+                        color="#999", weight=0.5, dash_array="5,5").add_to(m)
+        folium.map.Marker(
+            [lats[-1]+0.5, lon],  # desloca para cima
+            icon=folium.DivIcon(html=f'<div style="font-size:9px;color:#555">{lon}°</div>')
+        ).add_to(m)
+
+    # =========================
+    # Camadas shapefile
+    # =========================
     layer_colors = [
         '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f',
         '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#b15928', '#ffffb3',
@@ -208,6 +221,12 @@ def create_map(shapefiles_folder, selected_layers):
         '#e78ac3', '#fdc086', '#ffffcc', '#b3cde3', '#decbe4', '#f2f2f2',
         '#fbb4ae', '#b4464b', '#7fc97f'
     ]
+
+    shp_files = [f for f in os.listdir(shapefiles_folder) if f.lower().endswith('.shp')]
+    num_layers = max(len(shp_files), len(selected_layers))
+    if num_layers > len(layer_colors):
+        times = (num_layers // len(layer_colors)) + 1
+        layer_colors = (layer_colors * times)[:num_layers]
 
     bounds = []
     legend_entries = []
@@ -229,7 +248,6 @@ def create_map(shapefiles_folder, selected_layers):
         bounds.append(gdf.total_bounds)
         legend_entries.append((fmt_layer_name(layer_name), color))
 
-    # Ajusta limites
     if bounds:
         min_lon = min([b[0] for b in bounds])
         min_lat = min([b[1] for b in bounds])
@@ -239,11 +257,13 @@ def create_map(shapefiles_folder, selected_layers):
 
     LayerControl(collapsed=False).add_to(m)
 
-    # Legenda no canto inferior direito
+    # =========================
+    # Legenda no canto superior esquerdo
+    # =========================
     legend_html = """
     {% macro html(this, kwargs) %}
     <div style="
-        position: absolute; bottom: 10px; right: 10px; z-index: 9999;
+        position: absolute; top: 10px; left: 10px; z-index: 9999;
         background-color: rgba(255,255,255,0.9); padding: 8px 10px;
         border-radius: 6px; font-size: 11px; max-width: 260px;
         box-shadow: 0 0 6px rgba(0,0,0,0.25); line-height: 1.25;
@@ -265,6 +285,7 @@ def create_map(shapefiles_folder, selected_layers):
     m.get_root().add_child(macro)
 
     return m
+
 
 
 # =========================
