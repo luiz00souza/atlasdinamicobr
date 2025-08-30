@@ -181,7 +181,7 @@ def create_map(shapefiles_folder, selected_layers, grid_interval=5):
     # Datum no canto inferior direito
     datum_html = """
     <div style="
-        position: absolute; bottom: 15px; left: 10px; z-index: 9999;
+        position: absolute; bottom: 10px; left: 20px; z-index: 9999;
         background-color: rgba(255,255,255,0.9); padding: 4px 6px;
         border-radius: 4px; font-size: 11px; box-shadow: 0 0 4px rgba(0,0,0,0.2);
     ">Datum: WGS84</div>
