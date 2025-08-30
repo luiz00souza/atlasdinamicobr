@@ -174,6 +174,7 @@ def create_map(shapefiles_folder, selected_layers, grid_interval=2):
     import os
     from branca.element import Template, MacroElement
     import numpy as np
+    import streamlit as st
 
     # Mapa base
     m = folium.Map(location=[-15, -47], zoom_start=4, control_scale=True)
@@ -188,7 +189,7 @@ def create_map(shapefiles_folder, selected_layers, grid_interval=2):
     """
     m.get_root().html.add_child(folium.Element(datum_html))
 
-    # Definir cores e adicionar camadas
+    # Definir cores
     layer_colors = [
         '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f',
         '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#b15928', '#ffffb3',
@@ -199,19 +200,24 @@ def create_map(shapefiles_folder, selected_layers, grid_interval=2):
         '#fbb4ae', '#b4464b', '#7fc97f'
     ]
 
-    shp_files = [f for f in os.listdir(shapefiles_folder) if f.lower().endswith('.shp')]
-    num_layers = max(len(shp_files), len(selected_layers))
-    if num_layers > len(layer_colors):
-        times = (num_layers // len(layer_colors)) + 1
-        layer_colors = (layer_colors * times)[:num_layers]
-
     bounds = []
     legend_entries = []
 
     for idx, shp in enumerate(selected_layers):
-        gdf = gpd.read_file(os.path.join(shapefiles_folder, shp))
+        filepath = os.path.join(shapefiles_folder, shp)
+        if not os.path.exists(filepath):
+            st.warning(f"⚠️ Arquivo não encontrado: {shp}")
+            continue  # pula este shapefile
+
+        try:
+            gdf = gpd.read_file(filepath)
+        except Exception as e:
+            st.warning(f"❌ Erro ao carregar {shp}: {e}")
+            continue
+
         color = layer_colors[idx % len(layer_colors)]
         layer_name = shp.replace('.shp', '')
+
         GeoJson(
             gdf,
             name=fmt_layer_name(layer_name),
@@ -222,6 +228,7 @@ def create_map(shapefiles_folder, selected_layers, grid_interval=2):
                 'fillOpacity': 0.7
             }
         ).add_to(m)
+
         bounds.append(gdf.total_bounds)
         legend_entries.append((fmt_layer_name(layer_name), color))
 
@@ -233,7 +240,6 @@ def create_map(shapefiles_folder, selected_layers, grid_interval=2):
         max_lat = max([b[3] for b in bounds])
         m.fit_bounds([[min_lat, min_lon], [max_lat, max_lon]])
     else:
-        # Limites padrão se nenhum shapefile
         min_lon, min_lat, max_lon, max_lat = -50, -20, -40, 0
 
     # -------------------
@@ -281,7 +287,6 @@ def create_map(shapefiles_folder, selected_layers, grid_interval=2):
     macro._template = Template(legend_html)
     m.get_root().add_child(macro)
 
-    #LayerControl(collapsed=False).add_to(m)
     return m
 
 
