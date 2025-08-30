@@ -189,26 +189,28 @@ def create_shapefile_zip(shapefiles_folder, selected_layers):
     return buffer
 
 def create_map(shapefiles_folder, selected_layers):
-    import numpy as np
-    from folium import Map, GeoJson, LayerControl, Element
-    from folium import plugins
-    from branca.element import Template, MacroElement
     import geopandas as gpd
+    import folium
+    from folium import LayerControl, GeoJson, Element
+    from branca.element import Template, MacroElement
     import os
 
     # Cria mapa base
-    m = Map(location=[-15, -47], zoom_start=4, control_scale=False)  # escala será custom
-    plugins.Scale(position='bottomright').add_to(m)  # Escala dinâmica
+    m = folium.Map(location=[-15, -47], zoom_start=4, control_scale=False)  # desliga escala nativa
 
-    # Datum fixo
-    datum_html = """
+    # Datum + escala custom no canto inferior direito
+    scale_datum_html = """
     <div style="
-        position: absolute; bottom: 30px; right: 10px; z-index: 9999;
-        background-color: rgba(255,255,255,0.9); padding: 4px 6px;
-        border-radius: 4px; font-size: 11px; box-shadow: 0 0 4px rgba(0,0,0,0.2);
-    ">Datum: WGS84</div>
+        position: absolute; bottom: 10px; right: 10px; z-index: 9999;
+        background-color: rgba(255,255,255,0.9); padding: 6px 8px;
+        border-radius: 5px; font-size: 12px; box-shadow: 0 0 4px rgba(0,0,0,0.2);
+        line-height: 1.3;
+    ">
+        <b>Escala:</b> 100 km aprox.<br>
+        <b>Datum:</b> WGS84
+    </div>
     """
-    m.get_root().html.add_child(Element(datum_html))
+    m.get_root().html.add_child(Element(scale_datum_html))
 
     # Definir cores
     layer_colors = [
@@ -260,7 +262,7 @@ def create_map(shapefiles_folder, selected_layers):
     # Controle de camadas
     LayerControl(collapsed=False).add_to(m)
 
-    # Legenda fixa
+    # Legenda fixa (canto inferior esquerdo)
     legend_html = """
     {% macro html(this, kwargs) %}
     <div style="
@@ -290,6 +292,7 @@ def create_map(shapefiles_folder, selected_layers):
     m.get_root().add_child(macro)
 
     return m
+
 
 # =========================
 # TÍTULO + AVISOS
