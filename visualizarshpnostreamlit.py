@@ -341,37 +341,49 @@ if view == "🗺️ Mapa Interativo":
     )
     layer_type = 'Mesclados' if layer_type.startswith("🔎") else 'Subdivididos'
 
-    selected_layers = []
+    # Seleciona o dicionário de camadas
     category_dict = categories_individuais if layer_type == 'Mesclados' else categories
 
     # --------------------
     # Botões globais
     # --------------------
     st.sidebar.caption("Ações rápidas:")
-    col_btns = st.sidebar.columns([1,1])
+    col_btns = st.sidebar.columns([1, 1])
+
     if col_btns[0].button("✅ Selecionar tudo"):
+        all_layers = []
         for category, files in category_dict.items():
-            st.session_state[f"{category}_selected"] = [fmt_layer_name(shp) for shp in files]
+            for shp in files:
+                all_layers.append(fmt_layer_name(shp))
+        st.session_state["all_selected"] = all_layers
+
     if col_btns[1].button("❌ Limpar tudo"):
-        for category in category_dict.keys():
-            st.session_state[f"{category}_selected"] = []
+        st.session_state["all_selected"] = []
 
     # --------------------
-    # Expanders com multiselects
+    # Multiselect único (sem subdivisões)
     # --------------------
     st.sidebar.caption("Marque as camadas que deseja visualizar no mapa:")
-    for category, files in category_dict.items():
-        with st.sidebar.expander(f"{category}"):
-            selected = st.multiselect(
-                f"Camadas ({category})",
-                options=[fmt_layer_name(shp) for shp in files],
-                default=st.session_state.get(f"{category}_selected", [fmt_layer_name(shp) for shp in files])
-            )
-            st.session_state[f"{category}_selected"] = selected
 
-            for shp in files:
-                if fmt_layer_name(shp) in selected:
-                    selected_layers.append(shp)
+    all_layers = []
+    for category, files in category_dict.items():
+        for shp in files:
+            all_layers.append(fmt_layer_name(shp))
+
+    selected = st.sidebar.multiselect(
+        "Camadas disponíveis",
+        options=all_layers,
+        default=st.session_state.get("all_selected", all_layers)
+    )
+
+    st.session_state["all_selected"] = selected
+
+    # Lista de shapefiles escolhidos
+    selected_layers = []
+    for category, files in category_dict.items():
+        for shp in files:
+            if fmt_layer_name(shp) in selected:
+                selected_layers.append(shp)
 
     if selected_layers:
         map_obj = create_map(shapefiles_folder_subdivididos, selected_layers)
