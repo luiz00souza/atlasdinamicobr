@@ -23,7 +23,7 @@ st.set_page_config(
 # =========================
 # DADOS / ARQUIVOS
 # =========================
-df_teste = pd.read_csv("ALLDATA_onehot_clipped.csv")
+df_teste = pd.read_csv("ALLDATA_onehot_clipped.csv", encoding="latin1")
 
 # Diretório dos shapefiles subdivididos
 shapefiles_folder_subdivididos = "."
