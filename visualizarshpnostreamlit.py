@@ -325,6 +325,63 @@ view = st.sidebar.radio(
     ["🗺️ Mapa Interativo", "📍 Enviar Dados", "🧾 Consultar Dados", "ℹ️ Sobre o Atlas"],
     index=0
 )
+def fmt_layer_name(shp):
+    """Formata o nome da camada para exibição"""
+    return shp.replace(".shp","").replace("_"," ").title()
+
+def get_layers_by_substrate():
+    layers = []
+    for zone_files in categories.values():
+        for shp in zone_files:
+            for substrato in categories_individuais["Substrato"]:
+                if f"_{substrato}_" in shp:
+                    layers.append(shp)
+    return layers
+
+def get_layers_by_biogenic():
+    layers = []
+    for zone_files in categories.values():
+        for shp in zone_files:
+            for bio in categories_individuais["Biogênico"]:
+                if f"_{bio}." in shp:  # ponto antes do 'shp'
+                    layers.append(shp)
+    return layers
+
+# =========================
+# CSS Multiselect fonte 11
+# =========================
+st.markdown(
+    """
+    <style>
+    div.stMultiSelect > div > div > div {
+        font-size: 11px;
+    }
+    div.stMultiSelect > div > div > div > div[role="listbox"] > div {
+        font-size: 11px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# =========================
+# TÍTULO + AVISOS
+# =========================
+st.title("🌊 Atlas Interativo do Fundo do Mar — Base EUNIS")
+st.markdown(
+    """ **Nota importante:** Este atlas **não é atualizado em tempo real**.  
+Usuários podem **enviar dados** para que sejam **avaliados** por nossa equipe técnica; somente após essa avaliação os dados podem ser **incorporados ao modelo**. """
+)
+
+# =========================
+# SIDEBAR
+# =========================
+st.sidebar.header("Navegação")
+view = st.sidebar.radio(
+    "Ir para:",
+    ["🗺️ Mapa Interativo", "📍 Enviar Dados", "🧾 Consultar Dados", "ℹ️ Sobre o Atlas"],
+    index=0
+)
 
 # =========================
 # 1) VISUALIZAR MAPA
@@ -345,9 +402,9 @@ if view == "🗺️ Mapa Interativo":
     if level == "🌊 Zonas":
         category_dict = {"Zona": categories_individuais["Zona"]}
     elif level == "🪨 Substratos":
-        category_dict = {"Substrato": categories_individuais["Substrato"]}
+        category_dict = {"Substrato": get_layers_by_substrate()}
     elif level == "🧬 Biogênico":
-        category_dict = {"Biogênico": categories_individuais["Biogênico"]}
+        category_dict = {"Biogênico": get_layers_by_biogenic()}
     else:  # 🧩 Subcategorias detalhadas
         category_dict = categories
 
@@ -399,11 +456,6 @@ if view == "🗺️ Mapa Interativo":
         zip_buffer = create_shapefile_zip(shapefiles_folder_subdivididos, selected_layers)
         st.download_button(
             label="⬇️ Baixar Shapefiles Selecionados (.zip)",
-            data=zip_buffer,
-            file_name="shapefiles_selecionados.zip",
-            mime="application/zip",
-            help="Faz o download de todos os arquivos necessários (.shp, .shx, .dbf, .prj, .cpg)."
-        )
     else:
         st.info("Selecione ao menos uma camada na barra lateral para visualizar o mapa.")
 
