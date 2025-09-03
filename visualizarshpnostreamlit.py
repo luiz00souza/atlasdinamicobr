@@ -344,13 +344,14 @@ if view == "🗺️ Mapa Interativo":
     # Seleção de dicionário por nível
     # --------------------
     if level == "🌊 Zonas":
-        category_dict = categorias_zonas
+        category_dict = {"Zona": categories_individuais["Zona"]}
     elif level == "🪨 Substratos":
-        category_dict = categorias_substratos
+        category_dict = {"Substrato": categories_individuais["Substrato"]}
     elif level == "🧬 Biogênico":
-        category_dict = categorias_biogenico
+        category_dict = {"Biogênico": categories_individuais["Biogênico"]}
     else:  # 🧩 Subcategorias detalhadas
-        category_dict = categories  # já detalhado
+        category_dict = categories
+
 
     # --------------------
     # Botões globais
