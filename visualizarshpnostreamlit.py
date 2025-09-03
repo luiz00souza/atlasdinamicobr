@@ -307,73 +307,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-# -*- coding: utf-8 -*-
-import streamlit as st
-import os
-import pandas as pd
-from streamlit_folium import st_folium
 
-# =========================
-# CONFIGURAÇÃO GERAL
-# =========================
-st.set_page_config(
-    page_title="Atlas Interativo do Fundo do Mar (EUNIS)",
-    page_icon="🌊",
-    layout="wide"
-)
-
-# =========================
-# DADOS / ARQUIVOS
-# =========================
-df_teste = pd.read_csv("ALLDATA_onehot_clipped.csv", encoding="latin1")
-
-# Diretório dos shapefiles subdivididos
-shapefiles_folder_subdivididos = "."
-os.makedirs(shapefiles_folder_subdivididos, exist_ok=True)
-
-# =========================
-# ESTRUTURA DAS CATEGORIAS
-# =========================
-categories  = {
-    'littoral': [
-        'littoral_coarse_biogenic.shp', 'littoral_coarse_recifal.shp', 'littoral_coarse_rhodolite.shp', 'littoral_coarse_terrigeneous.shp',
-        'littoral_mixed_biogenic.shp', 'littoral_mixed_recifal.shp', 'littoral_mixed_rhodolite.shp', 'littoral_mixed_terrigeneous.shp',
-        'littoral_mud_biogenic.shp', 'littoral_mud_recifal.shp', 'littoral_mud_rhodolite.shp', 'littoral_mud_terrigeneous.shp',
-        'littoral_sand_biogenic.shp', 'littoral_sand_recifal.shp', 'littoral_sand_rhodolite.shp', 'littoral_sand_terrigeneous.shp',
-        'littoral_hardrock_biogenic.shp', 'littoral_hardrock_recifal.shp', 'littoral_hardrock_rhodolite.shp', 'littoral_hardrock_terrigeneous.shp'
-    ],
-    'circalittoral': [
-        'circalittoral_coarse_biogenic.shp', 'circalittoral_coarse_recifal.shp', 'circalittoral_coarse_rhodolite.shp', 'circalittoral_coarse_terrigeneous.shp',
-        'circalittoral_mixed_biogenic.shp', 'circalittoral_mixed_recifal.shp', 'circalittoral_mixed_rhodolite.shp', 'circalittoral_mixed_terrigeneous.shp',
-        'circalittoral_mud_biogenic.shp', 'circalittoral_mud_recifal.shp', 'circalittoral_mud_rhodolite.shp', 'circalittoral_mud_terrigeneous.shp',
-        'circalittoral_sand_biogenic.shp', 'circalittoral_sand_recifal.shp', 'circalittoral_sand_rhodolite.shp', 'circalittoral_sand_terrigeneous.shp',
-        'circalittoral_hardrock_biogenic.shp', 'circalittoral_hardrock_recifal.shp', 'circalittoral_hardrock_rhodolite.shp', 'circalittoral_hardrock_terrigeneous.shp'
-    ],
-    'offshore': [
-        'offshore_coarse_biogenic.shp', 'offshore_coarse_recifal.shp', 'offshore_coarse_rhodolite.shp', 'offshore_coarse_terrigeneous.shp',
-        'offshore_mixed_biogenic.shp', 'offshore_mixed_recifal.shp', 'offshore_mixed_rhodolite.shp', 'offshore_mixed_terrigeneous.shp',
-        'offshore_mud_biogenic.shp', 'offshore_mud_recifal.shp', 'offshore_mud_rhodolite.shp', 'offshore_mud_terrigeneous.shp',
-        'offshore_sand_biogenic.shp', 'offshore_sand_recifal.shp', 'offshore_sand_rhodolite.shp', 'offshore_sand_terrigeneous.shp',
-        'offshore_hardrock_biogenic.shp', 'offshore_hardrock_recifal.shp', 'offshore_hardrock_rhodolite.shp', 'offshore_hardrock_terrigeneous.shp'
-    ],
-    'upper_bathyal': [
-        'upper_bathyal_coarse_biogenic.shp', 'upper_bathyal_coarse_recifal.shp', 'upper_bathyal_coarse_rhodolite.shp', 'upper_bathyal_coarse_terrigeneous.shp',
-        'upper_bathyal_mixed_biogenic.shp', 'upper_bathyal_mixed_recifal.shp', 'upper_bathyal_mixed_rhodolite.shp', 'upper_bathyal_mixed_terrigeneous.shp',
-        'upper_bathyal_mud_biogenic.shp', 'upper_bathyal_mud_recifal.shp', 'upper_bathyal_mud_rhodolite.shp', 'upper_bathyal_mud_terrigeneous.shp',
-        'upper_bathyal_sand_biogenic.shp', 'upper_bathyal_sand_recifal.shp', 'upper_bathyal_sand_rhodolite.shp', 'upper_bathyal_sand_terrigeneous.shp',
-        'upper_bathyal_hardrock_biogenic.shp', 'upper_bathyal_hardrock_recifal.shp', 'upper_bathyal_hardrock_rhodolite.shp', 'upper_bathyal_hardrock_terrigeneous.shp'
-    ]
-}
-
-categories_individuais = {
-    "Zona": ['littoral.shp','circalittoral.shp','offshore.shp','upper_bathyal.shp'],
-    "Substrato": ['coarse.shp','mixed.shp','mud.shp','sand.shp','hardrock.shp'],
-    "Biogênico": ['terrigeneous.shp','rhodolite.shp','biogenic.shp','recifal.shp']
-}
-
-# =========================
-# Funções auxiliares
-# =========================
 def fmt_layer_name(shp):
     return shp.replace(".shp","").replace("_"," ").title()
 
