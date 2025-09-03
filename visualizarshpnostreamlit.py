@@ -307,68 +307,74 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+# -*- coding: utf-8 -*-
+import streamlit as st
+import os
+import pandas as pd
+from streamlit_folium import st_folium
+
 # =========================
-# TÍTULO + AVISOS
+# CONFIGURAÇÃO GERAL
 # =========================
-st.title("🌊 Atlas Interativo do Fundo do Mar — Base EUNIS")
-st.markdown(
-    """ **Nota importante:** Este atlas **não é atualizado em tempo real**.  
-Usuários podem **enviar dados** para que sejam **avaliados** por nossa equipe técnica; somente após essa avaliação os dados podem ser **incorporados ao modelo**. """
+st.set_page_config(
+    page_title="Atlas Interativo do Fundo do Mar (EUNIS)",
+    page_icon="🌊",
+    layout="wide"
 )
 
 # =========================
-# SIDEBAR
+# DADOS / ARQUIVOS
 # =========================
-st.sidebar.header("Navegação")
-view = st.sidebar.radio(
-    "Ir para:",
-    ["🗺️ Mapa Interativo", "📍 Enviar Dados", "🧾 Consultar Dados", "ℹ️ Sobre o Atlas"],
-    index=0
-)
-def fmt_layer_name(shp):
-    """Formata o nome da camada para exibição"""
-    return shp.replace(".shp","").replace("_"," ").title()
+df_teste = pd.read_csv("ALLDATA_onehot_clipped.csv", encoding="latin1")
 
-def get_layers_by_substrate():
-    layers = []
-    for zone_files in categories.values():
-        for shp in zone_files:
-            for substrato in categories_individuais["Substrato"]:
-                if f"_{substrato}_" in shp:
-                    layers.append(shp)
-    return layers
-
-def get_layers_by_biogenic():
-    layers = []
-    for zone_files in categories.values():
-        for shp in zone_files:
-            for bio in categories_individuais["Biogênico"]:
-                if f"_{bio}." in shp:  # ponto antes do 'shp'
-                    layers.append(shp)
-    return layers
+# Diretório dos shapefiles subdivididos
+shapefiles_folder_subdivididos = "."
+os.makedirs(shapefiles_folder_subdivididos, exist_ok=True)
 
 # =========================
-# CSS Multiselect fonte 11
+# ESTRUTURA DAS CATEGORIAS
 # =========================
-st.markdown(
-    """
-    <style>
-    div.stMultiSelect > div > div > div {
-        font-size: 11px;
-    }
-    div.stMultiSelect > div > div > div > div[role="listbox"] > div {
-        font-size: 11px;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+categories  = {
+    'littoral': [
+        'littoral_coarse_biogenic.shp', 'littoral_coarse_recifal.shp', 'littoral_coarse_rhodolite.shp', 'littoral_coarse_terrigeneous.shp',
+        'littoral_mixed_biogenic.shp', 'littoral_mixed_recifal.shp', 'littoral_mixed_rhodolite.shp', 'littoral_mixed_terrigeneous.shp',
+        'littoral_mud_biogenic.shp', 'littoral_mud_recifal.shp', 'littoral_mud_rhodolite.shp', 'littoral_mud_terrigeneous.shp',
+        'littoral_sand_biogenic.shp', 'littoral_sand_recifal.shp', 'littoral_sand_rhodolite.shp', 'littoral_sand_terrigeneous.shp',
+        'littoral_hardrock_biogenic.shp', 'littoral_hardrock_recifal.shp', 'littoral_hardrock_rhodolite.shp', 'littoral_hardrock_terrigeneous.shp'
+    ],
+    'circalittoral': [
+        'circalittoral_coarse_biogenic.shp', 'circalittoral_coarse_recifal.shp', 'circalittoral_coarse_rhodolite.shp', 'circalittoral_coarse_terrigeneous.shp',
+        'circalittoral_mixed_biogenic.shp', 'circalittoral_mixed_recifal.shp', 'circalittoral_mixed_rhodolite.shp', 'circalittoral_mixed_terrigeneous.shp',
+        'circalittoral_mud_biogenic.shp', 'circalittoral_mud_recifal.shp', 'circalittoral_mud_rhodolite.shp', 'circalittoral_mud_terrigeneous.shp',
+        'circalittoral_sand_biogenic.shp', 'circalittoral_sand_recifal.shp', 'circalittoral_sand_rhodolite.shp', 'circalittoral_sand_terrigeneous.shp',
+        'circalittoral_hardrock_biogenic.shp', 'circalittoral_hardrock_recifal.shp', 'circalittoral_hardrock_rhodolite.shp', 'circalittoral_hardrock_terrigeneous.shp'
+    ],
+    'offshore': [
+        'offshore_coarse_biogenic.shp', 'offshore_coarse_recifal.shp', 'offshore_coarse_rhodolite.shp', 'offshore_coarse_terrigeneous.shp',
+        'offshore_mixed_biogenic.shp', 'offshore_mixed_recifal.shp', 'offshore_mixed_rhodolite.shp', 'offshore_mixed_terrigeneous.shp',
+        'offshore_mud_biogenic.shp', 'offshore_mud_recifal.shp', 'offshore_mud_rhodolite.shp', 'offshore_mud_terrigeneous.shp',
+        'offshore_sand_biogenic.shp', 'offshore_sand_recifal.shp', 'offshore_sand_rhodolite.shp', 'offshore_sand_terrigeneous.shp',
+        'offshore_hardrock_biogenic.shp', 'offshore_hardrock_recifal.shp', 'offshore_hardrock_rhodolite.shp', 'offshore_hardrock_terrigeneous.shp'
+    ],
+    'upper_bathyal': [
+        'upper_bathyal_coarse_biogenic.shp', 'upper_bathyal_coarse_recifal.shp', 'upper_bathyal_coarse_rhodolite.shp', 'upper_bathyal_coarse_terrigeneous.shp',
+        'upper_bathyal_mixed_biogenic.shp', 'upper_bathyal_mixed_recifal.shp', 'upper_bathyal_mixed_rhodolite.shp', 'upper_bathyal_mixed_terrigeneous.shp',
+        'upper_bathyal_mud_biogenic.shp', 'upper_bathyal_mud_recifal.shp', 'upper_bathyal_mud_rhodolite.shp', 'upper_bathyal_mud_terrigeneous.shp',
+        'upper_bathyal_sand_biogenic.shp', 'upper_bathyal_sand_recifal.shp', 'upper_bathyal_sand_rhodolite.shp', 'upper_bathyal_sand_terrigeneous.shp',
+        'upper_bathyal_hardrock_biogenic.shp', 'upper_bathyal_hardrock_recifal.shp', 'upper_bathyal_hardrock_rhodolite.shp', 'upper_bathyal_hardrock_terrigeneous.shp'
+    ]
+}
+
+categories_individuais = {
+    "Zona": ['littoral.shp','circalittoral.shp','offshore.shp','upper_bathyal.shp'],
+    "Substrato": ['coarse.shp','mixed.shp','mud.shp','sand.shp','hardrock.shp'],
+    "Biogênico": ['terrigeneous.shp','rhodolite.shp','biogenic.shp','recifal.shp']
+}
 
 # =========================
 # Funções auxiliares
 # =========================
 def fmt_layer_name(shp):
-    """Formata o nome da camada para exibição"""
     return shp.replace(".shp","").replace("_"," ").title()
 
 def get_layers_by_substrate():
@@ -385,35 +391,26 @@ def get_layers_by_biogenic():
     for zone_files in categories.values():
         for shp in zone_files:
             for bio in categories_individuais["Biogênico"]:
-                if f"_{bio}." in shp:  # ponto antes do 'shp'
+                if f"_{bio}." in shp:
                     layers.append(shp)
     return layers
 
 # =========================
 # CSS Multiselect fonte 11
 # =========================
-st.markdown(
-    """
-    <style>
-    div.stMultiSelect > div > div > div {
-        font-size: 11px;
-    }
-    div.stMultiSelect > div > div > div > div[role="listbox"] > div {
-        font-size: 11px;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+st.markdown("""
+<style>
+div.stMultiSelect > div > div > div { font-size: 11px; }
+div.stMultiSelect > div > div > div > div[role="listbox"] > div { font-size: 11px; }
+</style>
+""", unsafe_allow_html=True)
 
 # =========================
 # TÍTULO + AVISOS
 # =========================
 st.title("🌊 Atlas Interativo do Fundo do Mar — Base EUNIS")
-st.markdown(
-    """ **Nota importante:** Este atlas **não é atualizado em tempo real**.  
-Usuários podem **enviar dados** para que sejam **avaliados** por nossa equipe técnica; somente após essa avaliação os dados podem ser **incorporados ao modelo**. """
-)
+st.markdown(""" **Nota importante:** Este atlas **não é atualizado em tempo real**.  
+Usuários podem **enviar dados** para que sejam **avaliados** por nossa equipe técnica; somente após essa avaliação os dados podem ser **incorporados ao modelo**. """)
 
 # =========================
 # SIDEBAR
@@ -422,7 +419,8 @@ st.sidebar.header("Navegação")
 view = st.sidebar.radio(
     "Ir para:",
     ["🗺️ Mapa Interativo", "📍 Enviar Dados", "🧾 Consultar Dados", "ℹ️ Sobre o Atlas"],
-    index=0
+    index=0,
+    key="sidebar_view"
 )
 
 # =========================
@@ -430,81 +428,59 @@ view = st.sidebar.radio(
 # =========================
 if view == "🗺️ Mapa Interativo":
     st.subheader("🗺️ Mapa de Habitats (EUNIS)")
-
     st.sidebar.markdown("### Camadas")
     level = st.sidebar.radio(
         "Nível de detalhamento:",
         ["🌊 Zonas", "🪨 Substratos", "🧬 Biogênico", "🧩 Subcategorias detalhadas"],
-        index=0
+        index=0,
+        key="sidebar_level"
     )
 
-    # --------------------
-    # Seleção de dicionário por nível
-    # --------------------
+    # Seleção de shapefiles por nível
     if level == "🌊 Zonas":
         category_dict = {"Zona": categories_individuais["Zona"]}
     elif level == "🪨 Substratos":
         category_dict = {"Substrato": get_layers_by_substrate()}
     elif level == "🧬 Biogênico":
         category_dict = {"Biogênico": get_layers_by_biogenic()}
-    else:  # 🧩 Subcategorias detalhadas
+    else:
         category_dict = categories
 
-    # --------------------
-    # Botões globais
-    # --------------------
+    # Botões rápidos
     st.sidebar.caption("Ações rápidas:")
     col_btns = st.sidebar.columns([1, 1])
+    if col_btns[0].button("✅ Selecionar tudo", key="select_all"):
+        for category, files in category_dict.items():
+            st.session_state[f"{category}_selected"] = [fmt_layer_name(shp) for shp in files]
+    if col_btns[1].button("❌ Limpar tudo", key="clear_all"):
+        for category in category_dict.keys():
+            st.session_state[f"{category}_selected"] = []
 
-    if col_btns[0].button("✅ Selecionar tudo"):
-        all_layers = []
-        for _, files in category_dict.items():
-            for shp in files:
-                all_layers.append(fmt_layer_name(shp))
-        st.session_state["all_selected"] = all_layers
-
-    if col_btns[1].button("❌ Limpar tudo"):
-        st.session_state["all_selected"] = []
-
-    # --------------------
-    # Multiselect único
-    # --------------------
+    # Expanders com multiselects
     st.sidebar.caption("Marque as camadas que deseja visualizar no mapa:")
-
-    all_layers = []
-    for _, files in category_dict.items():
-        for shp in files:
-            all_layers.append(fmt_layer_name(shp))
-
-    selected = st.sidebar.multiselect(
-        "Camadas disponíveis",
-        options=all_layers,
-        default=st.session_state.get("all_selected", all_layers)
-    )
-
-    st.session_state["all_selected"] = selected
-
-    # Lista de shapefiles escolhidos
     selected_layers = []
-    for _, files in category_dict.items():
-        for shp in files:
-            if fmt_layer_name(shp) in selected:
-                selected_layers.append(shp)
+    for category, files in category_dict.items():
+        with st.sidebar.expander(f"{category}", expanded=True):
+            selected = st.multiselect(
+                f"Camadas ({category})",
+                options=[fmt_layer_name(shp) for shp in files],
+                default=st.session_state.get(f"{category}_selected", [fmt_layer_name(shp) for shp in files]),
+                key=f"multi_{category}"  # chave única
+            )
+            st.session_state[f"{category}_selected"] = selected
+            for shp in files:
+                if fmt_layer_name(shp) in selected:
+                    selected_layers.append(shp)
 
     if selected_layers:
-        map_obj = create_map(shapefiles_folder_subdivididos, selected_layers)
-        st_data = st_folium(map_obj, width=1100, height=640)
-        st.divider()
-        zip_buffer = create_shapefile_zip(shapefiles_folder_subdivididos, selected_layers)
-        st.download_button(
-            label="⬇️ Baixar Shapefiles Selecionados (.zip)",
-            data=zip_buffer,
-            file_name="shapefiles_selecionados.zip",
-            mime="application/zip",
-            help="Faz o download de todos os arquivos necessários (.shp, .shx, .dbf, .prj, .cpg)."
-        )
+        # Aqui você deve chamar sua função que cria o mapa
+        # map_obj = create_map(shapefiles_folder_subdivididos, selected_layers)
+        # st_folium(map_obj, width=1100, height=640)
+        st.write("🔹 Mapas carregados (apenas para demonstração)")
+        st.write(selected_layers)
     else:
         st.info("Selecione ao menos uma camada na barra lateral para visualizar o mapa.")
+
 # =========================
 # 2) CADASTRAR PONTOS
 # =========================
