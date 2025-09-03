@@ -343,35 +343,33 @@ if view == "🗺️ Mapa Interativo":
 
     selected_layers = []
     category_dict = categories_individuais if layer_type == 'Mesclados' else categories
+st.sidebar.header("Camadas para Visualização")
 
-    # --------------------
-    # Botões globais
-    # --------------------
-    st.sidebar.caption("Ações rápidas:")
-    col_btns = st.sidebar.columns([1,1])
-    if col_btns[0].button("✅ Selecionar tudo"):
-        for category, files in category_dict.items():
-            st.session_state[f"{category}_selected"] = [fmt_layer_name(shp) for shp in files]
-    if col_btns[1].button("❌ Limpar tudo"):
-        for category in category_dict.keys():
-            st.session_state[f"{category}_selected"] = []
+# Botões globais para selecionar/limpar tudo
+col_sel, col_limpar = st.sidebar.columns([1,1])
+if col_sel.button("Selecionar Todas"):
+    for category, files in categories_individuais.items():
+        st.session_state[f"{category}_selected"] = [fmt_layer_name(shp) for shp in files]
+if col_limpar.button("Limpar Todas"):
+    for category in categories_individuais.keys():
+        st.session_state[f"{category}_selected"] = []
 
-    # --------------------
-    # Expanders com multiselects
-    # --------------------
-    st.sidebar.caption("Marque as camadas que deseja visualizar no mapa:")
-    for category, files in category_dict.items():
-        with st.sidebar.expander(f"{category}"):
-            selected = st.multiselect(
-                f"Camadas ({category})",
-                options=[fmt_layer_name(shp) for shp in files],
-                default=st.session_state.get(f"{category}_selected", [fmt_layer_name(shp) for shp in files])
-            )
-            st.session_state[f"{category}_selected"] = selected
-
-            for shp in files:
-                if fmt_layer_name(shp) in selected:
-                    selected_layers.append(shp)
+# Multiselect por categoria
+selected_layers = []
+for category, files in categories_individuais.items():
+    st.sidebar.markdown(f"### {category}")
+    options = [fmt_layer_name(shp) for shp in files]
+    default = st.session_state.get(f"{category}_selected", options)
+    selected = st.sidebar.multiselect(
+        f"Camadas ({category})",
+        options=options,
+        default=default
+    )
+    st.session_state[f"{category}_selected"] = selected
+    # Adiciona shapefiles selecionados
+    for shp in files:
+        if fmt_layer_name(shp) in selected:
+            selected_layers.append(shp)
 
     if selected_layers:
         map_obj = create_map(shapefiles_folder_subdivididos, selected_layers)
