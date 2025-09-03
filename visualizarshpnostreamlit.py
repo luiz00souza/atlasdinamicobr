@@ -307,7 +307,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
 # =========================
 # TÍTULO + AVISOS
 # =========================
@@ -351,7 +350,6 @@ if view == "🗺️ Mapa Interativo":
         category_dict = {"Biogênico": categories_individuais["Biogênico"]}
     else:  # 🧩 Subcategorias detalhadas
         category_dict = categories
-
 
     # --------------------
     # Botões globais
