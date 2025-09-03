@@ -334,15 +334,23 @@ if view == "🗺️ Mapa Interativo":
     st.subheader("🗺️ Mapa de Habitats (EUNIS)")
 
     st.sidebar.markdown("### Camadas")
-    layer_type = st.sidebar.radio(
+    level = st.sidebar.radio(
         "Nível de detalhamento:",
-        ["🔎 Categorias gerais (Zonas, Substratos, Biogênico)", "🧩 Subcategorias detalhadas"],
+        ["🌊 Zonas", "🪨 Substratos", "🧬 Biogênico", "🧩 Subcategorias detalhadas"],
         index=0
     )
-    layer_type = 'Mesclados' if layer_type.startswith("🔎") else 'Subdivididos'
 
-    # Seleciona o dicionário de camadas
-    category_dict = categories_individuais if layer_type == 'Mesclados' else categories
+    # --------------------
+    # Seleção de dicionário por nível
+    # --------------------
+    if level == "🌊 Zonas":
+        category_dict = categorias_zonas
+    elif level == "🪨 Substratos":
+        category_dict = categorias_substratos
+    elif level == "🧬 Biogênico":
+        category_dict = categorias_biogenico
+    else:  # 🧩 Subcategorias detalhadas
+        category_dict = categories  # já detalhado
 
     # --------------------
     # Botões globais
@@ -352,7 +360,7 @@ if view == "🗺️ Mapa Interativo":
 
     if col_btns[0].button("✅ Selecionar tudo"):
         all_layers = []
-        for category, files in category_dict.items():
+        for _, files in category_dict.items():
             for shp in files:
                 all_layers.append(fmt_layer_name(shp))
         st.session_state["all_selected"] = all_layers
@@ -361,12 +369,12 @@ if view == "🗺️ Mapa Interativo":
         st.session_state["all_selected"] = []
 
     # --------------------
-    # Multiselect único (sem subdivisões)
+    # Multiselect único
     # --------------------
     st.sidebar.caption("Marque as camadas que deseja visualizar no mapa:")
 
     all_layers = []
-    for category, files in category_dict.items():
+    for _, files in category_dict.items():
         for shp in files:
             all_layers.append(fmt_layer_name(shp))
 
@@ -380,7 +388,7 @@ if view == "🗺️ Mapa Interativo":
 
     # Lista de shapefiles escolhidos
     selected_layers = []
-    for category, files in category_dict.items():
+    for _, files in category_dict.items():
         for shp in files:
             if fmt_layer_name(shp) in selected:
                 selected_layers.append(shp)
