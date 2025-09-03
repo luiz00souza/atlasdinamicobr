@@ -343,8 +343,12 @@ div.stMultiSelect > div > div > div > div[role="listbox"] > div { font-size: 11p
 # TÍTULO + AVISOS
 # =========================
 st.title("🌊 Atlas Interativo do Fundo do Mar — Base EUNIS")
-st.markdown(""" **Nota importante:** Este atlas **não é atualizado em tempo real**.  
-Usuários podem **enviar dados** para que sejam **avaliados** por nossa equipe técnica; somente após essa avaliação os dados podem ser **incorporados ao modelo**. """)
+st.markdown(
+    """
+**Nota importante:** Este atlas **não é atualizado em tempo real**.  
+Usuários podem **enviar dados** para que sejam **avaliados** por nossa equipe técnica; somente após essa avaliação os dados podem ser **incorporados ao modelo**.
+"""
+)
 
 # =========================
 # SIDEBAR
@@ -352,9 +356,8 @@ Usuários podem **enviar dados** para que sejam **avaliados** por nossa equipe t
 st.sidebar.header("Navegação")
 view = st.sidebar.radio(
     "Ir para:",
-    ["🗺️ Mapa Interativo", "📍 Enviar Dados", "🧾 Consultar Dados", "ℹ️ Sobre o Atlas"],
-    index=0,
-    key="sidebar_view"
+    ["🗺️ Mapa Interativo", "📍 Cadastrar Pontos", "🧾 Consultar Dados", "ℹ️ Sobre o Atlas"],
+    index=0
 )
 
 # =========================
@@ -362,60 +365,55 @@ view = st.sidebar.radio(
 # =========================
 if view == "🗺️ Mapa Interativo":
     st.subheader("🗺️ Mapa de Habitats (EUNIS)")
+
     st.sidebar.markdown("### Camadas")
-    level = st.sidebar.radio(
+    layer_type = st.sidebar.radio(
         "Nível de detalhamento:",
-        ["🌊 Zonas", "🪨 Substratos", "🧬 Biogênico", "🧩 Subcategorias detalhadas"],
-        index=0,
-        key="sidebar_level"
+        ["🔎 Categorias gerais (Zonas, Substratos, Biogênico)", "🧩 Subcategorias detalhadas"],
+        index=0
     )
+    layer_type = 'Mesclados' if layer_type.startswith("🔎") else 'Subdivididos'
 
-    # Seleção de shapefiles por nível
-    if level == "🌊 Zonas":
-        category_dict = {"Zona": categories_individuais["Zona"]}
-    elif level == "🪨 Substratos":
-        category_dict = {"Substrato": get_layers_by_substrate()}
-    elif level == "🧬 Biogênico":
-        category_dict = {"Biogênico": get_layers_by_biogenic()}
-    else:
-        category_dict = categories
-
-    # Botões rápidos
-    st.sidebar.caption("Ações rápidas:")
-    col_btns = st.sidebar.columns([1, 1])
-    if col_btns[0].button("✅ Selecionar tudo", key="select_all"):
-        for category, files in category_dict.items():
-            st.session_state[f"{category}_selected"] = [fmt_layer_name(shp) for shp in files]
-    if col_btns[1].button("❌ Limpar tudo", key="clear_all"):
-        for category in category_dict.keys():
-            st.session_state[f"{category}_selected"] = []
-
-    # Expanders com multiselects
-    st.sidebar.caption("Marque as camadas que deseja visualizar no mapa:")
     selected_layers = []
+    category_dict = categories_individuais if layer_type == 'Mesclados' else categories
+
+    st.sidebar.caption("Marque as camadas que deseja visualizar no mapa:")
     for category, files in category_dict.items():
-        with st.sidebar.expander(f"{category}", expanded=True):
+        with st.sidebar.expander(f"{category}"):
+            col_btns = st.columns([1,1])
+            if col_btns[0].button(f"Selecionar tudo ({category})", key=f"sel_all_{category}"):
+                st.session_state[f"{category}_selected"] = [fmt_layer_name(shp) for shp in files]
+            if col_btns[1].button(f"Limpar tudo ({category})", key=f"desel_all_{category}"):
+                st.session_state[f"{category}_selected"] = []
+
             selected = st.multiselect(
                 f"Camadas ({category})",
                 options=[fmt_layer_name(shp) for shp in files],
-                default=st.session_state.get(f"{category}_selected", [fmt_layer_name(shp) for shp in files]),
-                key=f"multi_{category}"  # chave única
+                default=st.session_state.get(f"{category}_selected", [fmt_layer_name(shp) for shp in files])
             )
             st.session_state[f"{category}_selected"] = selected
+
             for shp in files:
                 if fmt_layer_name(shp) in selected:
                     selected_layers.append(shp)
 
     if selected_layers:
-        # Aqui você deve chamar sua função que cria o mapa
-        # map_obj = create_map(shapefiles_folder_subdivididos, selected_layers)
-        # st_folium(map_obj, width=1100, height=640)
-        st.write("🔹 Mapas carregados (apenas para demonstração)")
-        st.write(selected_layers)
+        map_obj = create_map(shapefiles_folder_subdivididos, selected_layers)
+        st_data = st_folium(map_obj, width=1100, height=640)
+        st.divider()
+        zip_buffer = create_shapefile_zip(shapefiles_folder_subdivididos, selected_layers)
+        st.download_button(
+            label="⬇️ Baixar Shapefiles Selecionados (.zip)",
+            data=zip_buffer,
+            file_name="shapefiles_selecionados.zip",
+            mime="application/zip",
+            help="Faz o download de todos os arquivos necessários (.shp, .shx, .dbf, .prj, .cpg)."
+        )
     else:
         st.info("Selecione ao menos uma camada na barra lateral para visualizar o mapa.")
 
 # =========================
+
 # 2) CADASTRAR PONTOS
 # =========================
 elif view == "📍 Enviar Dados":
