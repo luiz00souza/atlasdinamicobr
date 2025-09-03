@@ -323,7 +323,7 @@ Usuários podem **enviar dados** para que sejam **avaliados** por nossa equipe t
 st.sidebar.header("Navegação")
 view = st.sidebar.radio(
     "Ir para:",
-    ["🗺️ Mapa Interativo", "📍 Cadastrar Pontos", "🧾 Consultar Dados", "ℹ️ Sobre o Atlas"],
+    ["🗺️ Mapa Interativo", "📍 Enviar Dados", "🧾 Consultar Dados", "ℹ️ Sobre o Atlas"],
     index=0
 )
 
@@ -391,7 +391,7 @@ if view == "🗺️ Mapa Interativo":
 # =========================
 # 2) CADASTRAR PONTOS
 # =========================
-elif view == "📍 Cadastrar Pontos":
+elif view == "📍 Enviar Dados":
     # ... mantém exatamente como estava
     pass
 
