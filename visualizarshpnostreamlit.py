@@ -383,10 +383,10 @@ if view == "🗺️ Mapa Interativo":
         category_dict = {"Zona": categories_individuais["Zona"]}
     elif level == "Substratos":
         # busca todos os shapefiles que correspondem aos substratos
-        category_dict = {"Substrato": get_layers_by_substrate()}
+        category_dict = {"Substrato": categories_individuais["Substrato"]}
     elif level == "Biogênico":
         # busca todos os shapefiles que correspondem ao biogênico
-        category_dict = {"Biogênico": get_layers_by_biogenic()}
+        category_dict = {"Biogênico":categories_individuais["Biogênico"]}
     else:
         # subcategorias detalhadas
         category_dict = categories
