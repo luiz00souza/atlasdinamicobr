@@ -338,7 +338,6 @@ div.stMultiSelect > div > div > div { font-size: 11px; }
 div.stMultiSelect > div > div > div > div[role="listbox"] > div { font-size: 11px; }
 </style>
 """, unsafe_allow_html=True)
-
 # =========================
 # TÍTULO + AVISOS
 # =========================
@@ -357,7 +356,8 @@ st.sidebar.header("Navegação")
 view = st.sidebar.radio(
     "Ir para:",
     ["🗺️ Mapa Interativo", "📍 Cadastrar Pontos", "🧾 Consultar Dados", "ℹ️ Sobre o Atlas"],
-    index=0
+    index=0,
+    key="sidebar_view"
 )
 
 # =========================
@@ -366,20 +366,35 @@ view = st.sidebar.radio(
 if view == "🗺️ Mapa Interativo":
     st.subheader("🗺️ Mapa de Habitats (EUNIS)")
 
-    st.sidebar.markdown("### Camadas")
-    layer_type = st.sidebar.radio(
-        "Nível de detalhamento:",
-        ["🔎 Categorias gerais (Zonas, Substratos, Biogênico)", "🧩 Subcategorias detalhadas"],
-        index=0
+    st.sidebar.markdown("### Nível de detalhamento")
+    level = st.sidebar.radio(
+        "Escolha o nível:",
+        ["Zonas", "Substratos", "Biogênico", "🧩 Subcategorias detalhadas"],
+        index=0,
+        key="sidebar_level"
     )
-    layer_type = 'Mesclados' if layer_type.startswith("🔎") else 'Subdivididos'
 
+    # --------------------
+    # Seleção de shapefiles por nível
+    # --------------------
     selected_layers = []
-    category_dict = categories_individuais if layer_type == 'Mesclados' else categories
+
+    if level == "Zonas":
+        category_dict = {"Zona": categories_individuais["Zona"]}
+    elif level == "Substratos":
+        # busca todos os shapefiles que correspondem aos substratos
+        category_dict = {"Substrato": get_layers_by_substrate()}
+    elif level == "Biogênico":
+        # busca todos os shapefiles que correspondem ao biogênico
+        category_dict = {"Biogênico": get_layers_by_biogenic()}
+    else:
+        # subcategorias detalhadas
+        category_dict = categories
 
     st.sidebar.caption("Marque as camadas que deseja visualizar no mapa:")
+
     for category, files in category_dict.items():
-        with st.sidebar.expander(f"{category}"):
+        with st.sidebar.expander(f"{category}", expanded=True):
             col_btns = st.columns([1,1])
             if col_btns[0].button(f"Selecionar tudo ({category})", key=f"sel_all_{category}"):
                 st.session_state[f"{category}_selected"] = [fmt_layer_name(shp) for shp in files]
@@ -389,7 +404,8 @@ if view == "🗺️ Mapa Interativo":
             selected = st.multiselect(
                 f"Camadas ({category})",
                 options=[fmt_layer_name(shp) for shp in files],
-                default=st.session_state.get(f"{category}_selected", [fmt_layer_name(shp) for shp in files])
+                default=st.session_state.get(f"{category}_selected", [fmt_layer_name(shp) for shp in files]),
+                key=f"multi_{category}"  # chave única
             )
             st.session_state[f"{category}_selected"] = selected
 
@@ -397,6 +413,9 @@ if view == "🗺️ Mapa Interativo":
                 if fmt_layer_name(shp) in selected:
                     selected_layers.append(shp)
 
+    # --------------------
+    # Exibe mapa e download
+    # --------------------
     if selected_layers:
         map_obj = create_map(shapefiles_folder_subdivididos, selected_layers)
         st_data = st_folium(map_obj, width=1100, height=640)
@@ -411,8 +430,6 @@ if view == "🗺️ Mapa Interativo":
         )
     else:
         st.info("Selecione ao menos uma camada na barra lateral para visualizar o mapa.")
-
-# =========================
 
 # 2) CADASTRAR PONTOS
 # =========================
