@@ -8,3 +8,4 @@ plotly
 fiona
 pyproj
 streamlit_folium
+geojson
