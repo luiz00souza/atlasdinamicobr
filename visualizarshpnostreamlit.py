@@ -461,6 +461,37 @@ elif view == "📍 Cadastrar Pontos":
                 }
                 st.session_state.dados.append(novo_dado)
                 st.success("✅ Ponto cadastrado com sucesso!")
+    elif opcao == "Carregar Arquivo CSV":
+        st.subheader("📂 Enviar Arquivo CSV")
+        uploaded_file = st.file_uploader("Escolha um arquivo CSV", type=["csv"])
+
+        if uploaded_file is not None:
+            try:
+                df_uploaded = pd.read_csv(uploaded_file, encoding="utf-8")
+            except UnicodeDecodeError:
+                try:
+                    df_uploaded = pd.read_csv(uploaded_file, encoding="ISO-8859-1")
+                except Exception as e:
+                    st.error(f"❌ Erro ao carregar o arquivo: {e}")
+                    df_uploaded = None
+
+            if df_uploaded is not None:
+                st.write("Pré-visualização dos dados carregados:")
+                st.dataframe(df_uploaded.head())
+
+                colunas_disponiveis = df_uploaded.columns.tolist()
+
+                col_latitude = st.selectbox("Selecione a coluna para Latitude", colunas_disponiveis)
+                col_longitude = st.selectbox("Selecione a coluna para Longitude", colunas_disponiveis)
+                col_tipo_fundo = st.selectbox("Selecione a coluna para Tipo de Fundo", colunas_disponiveis)
+                col_class_biogenica = st.selectbox("Selecione a coluna para Classificação Biogênica", colunas_disponiveis)
+
+                if st.button("Carregar Dados"):
+                    df_mapeado = df_uploaded[[col_latitude, col_longitude, col_tipo_fundo, col_class_biogenica]].copy()
+                    df_mapeado.columns = ["Latitude", "Longitude", "Tipo de Fundo", "Classificação Biogênica"]
+                    st.session_state.dados.extend(df_mapeado.to_dict(orient="records"))
+                    st.success("✅ Dados carregados com sucesso!")
+
     pass
 
 # =========================
