@@ -434,7 +434,33 @@ if view == "🗺️ Mapa Interativo":
 # 2) CADASTRAR PONTOS
 # =========================
 elif view == "📍 Cadastrar Pontos":
-    # ... mantém exatamente como estava
+    if "dados" not in st.session_state:
+        st.session_state.dados = []
+
+    # Opções de entrada de dados
+    opcao = st.radio("Como deseja inserir os dados?", ("Inserir Manualmente", "Carregar Arquivo CSV"))
+
+    if opcao == "Inserir Manualmente":
+        with st.form("entrada_dados"):
+            st.subheader("📌 Inserir Novo Ponto")
+
+            latitude = st.number_input("Latitude", format="%.6f", min_value=-90.0, max_value=90.0)
+            longitude = st.number_input("Longitude", format="%.6f", min_value=-180.0, max_value=180.0)
+
+            tipo_fundo = st.selectbox("Tipo de Fundo", ["Sand", "Mud", "Coarse", "Mixed", "Hard/Rock"])
+            classificacao_biogenica = st.selectbox("Classificação Biogênica", ["Terrigenous", "Biogenic", "Rhodolite", "Recifal"])
+
+            submitted = st.form_submit_button("Adicionar Ponto")
+
+            if submitted:
+                novo_dado = {
+                    "Latitude": latitude,
+                    "Longitude": longitude,
+                    "Tipo de Fundo": tipo_fundo,
+                    "Classificação Biogênica": classificacao_biogenica
+                }
+                st.session_state.dados.append(novo_dado)
+                st.success("✅ Ponto cadastrado com sucesso!")
     pass
 
 # =========================
