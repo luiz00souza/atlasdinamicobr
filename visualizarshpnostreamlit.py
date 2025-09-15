@@ -433,7 +433,7 @@ if view == "🗺️ Mapa Interativo":
 
 # 2) CADASTRAR PONTOS
 # =========================
-elif view == "📍 Enviar Dados":
+elif view == "📍 Cadastrar Pontos":
     # ... mantém exatamente como estava
     pass
 
