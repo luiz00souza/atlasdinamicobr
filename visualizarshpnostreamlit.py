@@ -307,7 +307,7 @@ def create_map(shapefiles_folder, selected_layers, grid_interval=2):
     macro._template = Template(legend_html)
     m.get_root().add_child(macro)
 
-    folium.LayerControl(collapsed=False).add_to(m)
+    #folium.LayerControl(collapsed=False).add_to(m)
 
     return m
 
